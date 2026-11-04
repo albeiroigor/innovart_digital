@@ -39,3 +39,6 @@ class MySQL:
         conn = g.pop("mysql_conn", None)
         if conn is not None:
             conn.close()
+
+
+mysql = MySQL()

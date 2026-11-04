@@ -1,12 +1,10 @@
 import os
 
-from Database import MySQL
+from Database import mysql
 from flask import Flask, current_app, jsonify
 from flask_cors import CORS
 
 from Config import Config
-
-mysql = MySQL()
 
 
 def createApp():

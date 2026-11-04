@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from Services.AgendaService import AgendaService
-from app import mysql
+from Database import mysql
 import uuid
 
 class AgendaController:
@@ -20,7 +20,7 @@ class AgendaController:
                 AGE_USU_ID,
                 AGE_SER_ID,
                 AGE_PAG_ID
-            FROM T_AGENDA
+            FROM t_agenda
         """
 
         cursor.execute(sql)
@@ -57,7 +57,7 @@ class AgendaController:
                 AGE_HORA,
                 AGE_USU_ID,
                 AGE_SER_ID
-            FROM T_AGENDA
+            FROM t_agenda
             WHERE AGE_ID = %s
         """
 
@@ -110,7 +110,7 @@ class AgendaController:
         cursor = mysql.connection.cursor()
 
         sql = """
-            INSERT INTO T_AGENDA
+            INSERT INTO t_agenda
             (
                 AGE_UUID,
                 AGE_FECHA,
@@ -162,7 +162,7 @@ class AgendaController:
         cursor = mysql.connection.cursor()
 
         sql = """
-            UPDATE T_AGENDA
+            UPDATE t_agenda
             SET
                 AGE_FECHA = %s,
                 AGE_HORA = %s,
@@ -205,7 +205,7 @@ class AgendaController:
         cursor = mysql.connection.cursor()
 
         sql = """
-            DELETE FROM T_AGENDA
+            DELETE FROM t_agenda
             WHERE AGE_ID = %s
         """
 
