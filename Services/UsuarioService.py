@@ -9,7 +9,7 @@ class UsuarioService:
 
     def list(self):
 
-        sql = "SELECT USU_ID, USU_UUID, USU_CORREO, USU_CONTRASEÑA, USU_PER_ID FROM t_usuario"
+        sql = "SELECT USU_ID, USU_UUID, USU_CORREO, USU_CONTRASENA, USU_PER_ID FROM t_usuario"
 
         c = current_app.mysql.connection.cursor()
         c.execute(sql)
@@ -37,7 +37,7 @@ class UsuarioService:
 
     def getById(self, id):
 
-        sql = "SELECT USU_ID, USU_UUID, USU_CORREO, USU_CONTRASEÑA, USU_PER_ID FROM t_usuario WHERE USU_ID = %s"
+        sql = "SELECT USU_ID, USU_UUID, USU_CORREO, USU_CONTRASENA, USU_PER_ID FROM t_usuario WHERE USU_ID = %s"
 
         c = current_app.mysql.connection.cursor()
         c.execute(sql, (id,))
@@ -93,7 +93,7 @@ class UsuarioService:
             (
                 USU_UUID,
                 USU_CORREO,
-                USU_CONTRASEÑA,
+                USU_CONTRASENA,
                 USU_PER_ID
             )
             VALUES (%s, %s, %s, %s)
@@ -136,7 +136,7 @@ class UsuarioService:
                 USU_ID,
                 USU_UUID,
                 USU_CORREO,
-                USU_CONTRASEÑA,
+                USU_CONTRASENA,
                 USU_PER_ID
             FROM t_usuario
             WHERE USU_CORREO = %s
@@ -184,7 +184,7 @@ class UsuarioService:
 
     def update(self, id, data):
 
-        sql = "UPDATE t_usuario SET USU_UUID = %s, USU_CORREO = %s, USU_CONTRASEÑA = %s, USU_PER_ID = %s WHERE USU_ID = %s"
+        sql = "UPDATE t_usuario SET USU_UUID = %s, USU_CORREO = %s, USU_CONTRASENA = %s, USU_PER_ID = %s WHERE USU_ID = %s"
 
         values = (data.get('uuid'), data.get('correo'), data.get('contrasena'), data.get('per_id'), id)
 
