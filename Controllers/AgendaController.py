@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from Services.AgendaService import AgendaService
-from App import mysql
+from app import mysql
 import uuid
 
 class AgendaController:
