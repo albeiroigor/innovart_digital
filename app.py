@@ -1,10 +1,10 @@
 import os
 
-from Database import mysql
-from flask import Flask, current_app, jsonify
+from flask import Flask, current_app
 from flask_cors import CORS
 
 from Config import Config
+from Database import mysql
 
 
 def createApp():
@@ -13,6 +13,11 @@ def createApp():
 
     mysql.init_app(app)
     app.mysql = mysql
+    mysql.initialize_schema(
+        app,
+        retries=app.config["MYSQL_INIT_RETRIES"],
+        delay=app.config["MYSQL_INIT_DELAY"],
+    )
 
     CORS(app)
 
@@ -27,15 +32,14 @@ def createApp():
     @app.route("/health")
     def health():
         try:
-            cur = current_app.mysql.connection.cursor()
-            cur.execute("SELECT 1")
-            cur.close()
+            with current_app.mysql.connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
             return {"status": "ok", "database": "connected"}, 200
-        except Exception as e:
+        except Exception as error:
             return {
                 "status": "error",
                 "database": "disconnected",
-                "detail": str(e)
+                "detail": str(error),
             }, 503
 
     return app

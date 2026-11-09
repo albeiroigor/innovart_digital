@@ -1,111 +1,116 @@
--- Esquema de base de datos para Innovart Digital
--- Ejecutar sobre MySQL antes de iniciar el backend.
--- Todos los nombres de tabla están en minúsculas para coincidir con los servicios.
-
-CREATE DATABASE IF NOT EXISTS InnovartDigital CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE InnovartDigital;
-
-CREATE TABLE IF NOT EXISTS t_rol (
-    ROL_ID INT AUTO_INCREMENT PRIMARY KEY,
-    ROL_UUID CHAR(36) NOT NULL UNIQUE,
-    ROL_TIPO VARCHAR(100) NOT NULL
+CREATE TABLE IF NOT EXISTS roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    tipo VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_persona (
-    PER_ID INT AUTO_INCREMENT PRIMARY KEY,
-    PER_UUID CHAR(36) NOT NULL UNIQUE,
-    PER_CEDULA VARCHAR(50),
-    PER_DOCUMENTO VARCHAR(50),
-    PER_PRIMER_NOMBRE VARCHAR(100),
-    PER_SEGUNDO_NOMBRE VARCHAR(100),
-    PER_PRIMER_APELLIDO VARCHAR(100),
-    PER_SEGUNDO_APELLIDO VARCHAR(100),
-    PER_CORREO VARCHAR(150),
-    PER_DIRECCION VARCHAR(200),
-    PER_TELEFONO VARCHAR(50),
-    PER_FECHA_NACIMIENTO DATE
+CREATE TABLE IF NOT EXISTS personas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    cedula VARCHAR(50),
+    documento VARCHAR(50),
+    primer_nombre VARCHAR(100),
+    segundo_nombre VARCHAR(100),
+    primer_apellido VARCHAR(100),
+    segundo_apellido VARCHAR(100),
+    correo VARCHAR(150),
+    direccion VARCHAR(200),
+    telefono VARCHAR(50),
+    fecha_nacimiento DATE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_usuario (
-    USU_ID INT AUTO_INCREMENT PRIMARY KEY,
-    USU_UUID CHAR(36) NOT NULL UNIQUE,
-    USU_CORREO VARCHAR(150) NOT NULL UNIQUE,
-    USU_CONTRASENA VARCHAR(255) NOT NULL,
-    USU_PER_ID INT,
-    FOREIGN KEY (USU_PER_ID) REFERENCES t_persona(PER_ID)
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    correo VARCHAR(150) NOT NULL UNIQUE,
+    contrasena VARCHAR(255) NOT NULL,
+    personas_id INT,
+    CONSTRAINT fk_usuarios_personas
+        FOREIGN KEY (personas_id) REFERENCES personas(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_servicio (
-    SER_ID INT AUTO_INCREMENT PRIMARY KEY,
-    SER_UUID CHAR(36) NOT NULL UNIQUE,
-    SER_NOMBRE VARCHAR(150) NOT NULL,
-    SER_DESCRIPCION TEXT,
-    SER_PRECIO DECIMAL(10,2),
-    SER_TIPO VARCHAR(100),
-    SER_ESTADO VARCHAR(50)
+CREATE TABLE IF NOT EXISTS servicios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10,2),
+    tipo VARCHAR(100),
+    estado VARCHAR(50)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_empleado (
-    EMP_ID INT AUTO_INCREMENT PRIMARY KEY,
-    EMP_UUID CHAR(36) NOT NULL UNIQUE,
-    EMP_ROL_ID INT,
-    EMP_RES_ID INT,
-    EMP_PER_ID INT,
-    EMP_SER_ID INT,
-    FOREIGN KEY (EMP_ROL_ID) REFERENCES t_rol(ROL_ID),
-    FOREIGN KEY (EMP_PER_ID) REFERENCES t_persona(PER_ID),
-    FOREIGN KEY (EMP_SER_ID) REFERENCES t_servicio(SER_ID)
+CREATE TABLE IF NOT EXISTS empleados (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    roles_id INT,
+    res_id INT,
+    personas_id INT,
+    servicios_id INT,
+    CONSTRAINT fk_empleados_roles
+        FOREIGN KEY (roles_id) REFERENCES roles(id),
+    CONSTRAINT fk_empleados_personas
+        FOREIGN KEY (personas_id) REFERENCES personas(id),
+    CONSTRAINT fk_empleados_servicios
+        FOREIGN KEY (servicios_id) REFERENCES servicios(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_pago (
-    PAG_ID INT AUTO_INCREMENT PRIMARY KEY,
-    PAG_UUID CHAR(36) NOT NULL UNIQUE,
-    PAG_HORA TIME,
-    PAG_FECHA DATE,
-    PAG_MONTO DECIMAL(10,2),
-    PAG_METODO_PAGO VARCHAR(50),
-    PAG_SER_ID INT,
-    PAG_USU_ID INT,
-    FOREIGN KEY (PAG_SER_ID) REFERENCES t_servicio(SER_ID),
-    FOREIGN KEY (PAG_USU_ID) REFERENCES t_usuario(USU_ID)
+CREATE TABLE IF NOT EXISTS pagos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    hora TIME,
+    fecha DATE,
+    monto DECIMAL(10,2),
+    metodo_pago VARCHAR(50),
+    servicios_id INT,
+    usuarios_id INT,
+    CONSTRAINT fk_pagos_servicios
+        FOREIGN KEY (servicios_id) REFERENCES servicios(id),
+    CONSTRAINT fk_pagos_usuarios
+        FOREIGN KEY (usuarios_id) REFERENCES usuarios(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_agenda (
-    AGE_ID INT AUTO_INCREMENT PRIMARY KEY,
-    AGE_UUID CHAR(36) NOT NULL UNIQUE,
-    AGE_FECHA DATE,
-    AGE_HORA TIME,
-    AGE_SER_ID INT,
-    AGE_USU_ID INT,
-    AGE_PAG_ID INT,
-    FOREIGN KEY (AGE_SER_ID) REFERENCES t_servicio(SER_ID),
-    FOREIGN KEY (AGE_USU_ID) REFERENCES t_usuario(USU_ID),
-    FOREIGN KEY (AGE_PAG_ID) REFERENCES t_pago(PAG_ID)
+CREATE TABLE IF NOT EXISTS agendas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    fecha DATE,
+    hora TIME,
+    servicios_id INT,
+    usuarios_id INT,
+    pagos_id INT,
+    CONSTRAINT fk_agendas_servicios
+        FOREIGN KEY (servicios_id) REFERENCES servicios(id),
+    CONSTRAINT fk_agendas_usuarios
+        FOREIGN KEY (usuarios_id) REFERENCES usuarios(id),
+    CONSTRAINT fk_agendas_pagos
+        FOREIGN KEY (pagos_id) REFERENCES pagos(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_servicio_agenda (
-    SER_AGE_ID INT AUTO_INCREMENT PRIMARY KEY,
-    SER_AGE_UUID CHAR(36) NOT NULL UNIQUE,
-    SER_AGE_SER_ID INT,
-    SER_AGE_AGE_ID INT,
-    FOREIGN KEY (SER_AGE_SER_ID) REFERENCES t_servicio(SER_ID),
-    FOREIGN KEY (SER_AGE_AGE_ID) REFERENCES t_agenda(AGE_ID)
+CREATE TABLE IF NOT EXISTS servicios_agenda (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    servicios_id INT,
+    agendas_id INT,
+    CONSTRAINT fk_servicios_agenda_servicios
+        FOREIGN KEY (servicios_id) REFERENCES servicios(id),
+    CONSTRAINT fk_servicios_agenda_agendas
+        FOREIGN KEY (agendas_id) REFERENCES agendas(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_consulta (
-    CON_ID INT AUTO_INCREMENT PRIMARY KEY,
-    CON_UUID CHAR(36) NOT NULL UNIQUE,
-    CON_HORA TIME,
-    CON_FECHA DATE,
-    CON_MENSAJE TEXT,
-    CON_USU_ID INT,
-    FOREIGN KEY (CON_USU_ID) REFERENCES t_usuario(USU_ID)
+CREATE TABLE IF NOT EXISTS consultas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    hora TIME,
+    fecha DATE,
+    mensaje TEXT,
+    usuarios_id INT,
+    CONSTRAINT fk_consultas_usuarios
+        FOREIGN KEY (usuarios_id) REFERENCES usuarios(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS t_respuesta (
-    RES_ID INT AUTO_INCREMENT PRIMARY KEY,
-    RES_UUID CHAR(36) NOT NULL UNIQUE,
-    RES_HORA TIME,
-    RES_DESCRIPCION TEXT,
-    RES_FECHA DATE
+CREATE TABLE IF NOT EXISTS respuestas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid CHAR(36) NOT NULL UNIQUE,
+    hora TIME,
+    descripcion TEXT,
+    fecha DATE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
