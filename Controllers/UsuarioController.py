@@ -1,134 +1,78 @@
-from flask import current_app, jsonify, request
+from flask import jsonify
+
+from Controllers.BaseController import CrudController
+from Services.BaseService import ConflictError
 from Services.UsuarioService import UsuarioService
 
 
-
-class UsuarioController:
-
+class UsuarioController(CrudController):
     service = UsuarioService()
-
-    def list(self):
-        return jsonify(self.service.list()), 200
-
-    
-
-    def get(self, id):
-        data = self.service.getById(id)
-
-        if data is None:
-            return jsonify({"mensaje": "Usuario no encontrado"}), 404
-
-        return jsonify(data), 200
-
-
+    resource = "usuario"
 
     def create(self):
+        data = self._payload()
+        if data is None:
+            return self._invalid_body()
 
-        data = request.get_json(silent=True)
+        error = self._validate(data, self.service.model.required_fields)
+        if error is not None:
+            return error
 
-        if not data:
-            return jsonify({
-                "mensaje": "El cuerpo de la petición no debe estar vacío o mal formateado"
-            }), 400
-
-        correo = data.get("correo")
-        contrasena = data.get("contrasena")
-        per_id = data.get("per_id")
-
-        # Validar campos
-        if not correo or not contrasena or not per_id:
-
-            return jsonify({
-                "mensaje": "Correo, contraseña y rol son obligatorios"
-            }), 400
-
-        # Validación básica de contraseña
-        if len(contrasena) < 8:
-
+        contrasena = data["contrasena"]
+        if not isinstance(contrasena, str) or len(contrasena) < 8:
             return jsonify({
                 "mensaje": "La contraseña debe tener mínimo 8 caracteres"
             }), 400
 
-        usuario, error = self.service.create(
-            current_app.mysql,
-            correo,
-            contrasena,
-            per_id
-        )
-
-        if error:
-
-            return jsonify({
-                "mensaje": error
-            }), 409
+        try:
+            usuario = self.service.create(data)
+        except ConflictError as error:
+            return jsonify({"mensaje": str(error)}), 409
 
         return jsonify({
             "mensaje": "Usuario registrado correctamente",
-            "usuario": usuario.to_dict()
+            "usuario": usuario,
         }), 201
 
-
     def login(self):
+        data = self._payload()
+        if data is None:
+            return self._invalid_body()
 
-        data = request.get_json()
+        error = self._validate(data, ("correo", "contrasena"))
+        if error is not None:
+            return error
 
-        if not data:
-
-            return jsonify({
-                "mensaje": "No se recibieron datos"
-            }), 400
-
-        correo = data.get("correo")
-        contrasena = data.get("contrasena")
-
-        if not correo or not contrasena:
-
-            return jsonify({
-                "mensaje": "Correo y contraseña son obligatorios"
-            }), 400
-
-        usuario = UsuarioService.validar_login(
-            current_app.mysql,
-            correo,
-            contrasena
+        usuario = self.service.validar_login(
+            data["correo"],
+            data["contrasena"],
         )
-
         if usuario is None:
-
-            return jsonify({
-                "mensaje": "Correo o contraseña incorrectos"
-            }), 401
+            return jsonify({"mensaje": "Correo o contraseña incorrectos"}), 401
 
         return jsonify({
             "mensaje": "Inicio de sesión exitoso",
-            "usuario": usuario.to_dict()
+            "usuario": usuario.to_dict(),
         }), 200
 
-
-    
-
     def update(self, id):
-        data = request.get_json(silent=True)
+        data = self._payload()
+        if data is None:
+            return self._invalid_body()
 
-        if not data:
+        contrasena = data.get("contrasena")
+        if contrasena is not None and (
+            not isinstance(contrasena, str) or len(contrasena) < 8
+        ):
             return jsonify({
-                "mensaje": "El cuerpo de la petición no debe estar vacío o mal formateado"
+                "mensaje": "La contraseña debe tener mínimo 8 caracteres"
             }), 400
 
-        usuario = UsuarioService().update(id, data)
+        try:
+            usuario = self.service.update(id, data)
+        except ConflictError as error:
+            return jsonify({"mensaje": str(error)}), 409
 
         if usuario is None:
-            return jsonify({"mensaje": "Usuario no encontrado"}), 404
-
+            return self._not_found()
         return jsonify(usuario), 200
-
-
-
-
-    def delete(self, id):
-        eliminado = UsuarioService().delete(id)
-
-        if not eliminado:
-            return jsonify({"mensaje": "Usuario no encontrado"}), 404
-
-        return jsonify({"mensaje": "Usuario eliminado correctamente"}), 200
