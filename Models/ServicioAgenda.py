@@ -1,14 +1,7 @@
-class ServicioAgenda:
-    def __init__(self, id, uuid, ser_id, age_id):
-        self.ser_age_id = id
-        self.ser_age_uuid = uuid
-        self.ser_age_ser_id = ser_id
-        self.ser_age_age_id = age_id
+from Models.BaseModel import BaseModel
 
-    def to_dict(self):
-        return {
-            "id": self.ser_age_id,
-            "uuid": self.ser_age_uuid,
-            "ser_id": self.ser_age_ser_id,
-            "age_id": self.ser_age_age_id
-        }
+
+class ServicioAgenda(BaseModel):
+    table = "servicios_agenda"
+    columns = ("id", "uuid", "servicios_id", "agendas_id")
+    required_fields = ("servicios_id", "agendas_id")

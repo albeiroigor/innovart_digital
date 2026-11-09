@@ -1,12 +1,7 @@
-class Rol:
-    def __init__(self, id, uuid, tipo):
-        self.rol_id = id
-        self.rol_uuid = uuid
-        self.rol_tipo = tipo
+from Models.BaseModel import BaseModel
 
-    def to_dict(self):
-        return {
-            "id": self.rol_id,
-            "uuid": self.rol_uuid,
-            "tipo": self.rol_tipo
-        }
+
+class Rol(BaseModel):
+    table = "roles"
+    columns = ("id", "uuid", "tipo")
+    required_fields = ("tipo",)
