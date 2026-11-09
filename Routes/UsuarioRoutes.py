@@ -1,43 +1,7 @@
-from flask import Blueprint
 from Controllers.UsuarioController import UsuarioController
-
-
-UsuarioRoutes = Blueprint("UsuarioRoutes", __name__)
+from .crud_routes import crud_blueprint
 
 controller = UsuarioController()
-
-
-@UsuarioRoutes.route("/", methods=["GET"])
-def list():
-    return controller.list()
-
-
-@UsuarioRoutes.route("/<int:id>", methods=["GET"])
-def get(id):
-    return controller.get(id)
-
-
-@UsuarioRoutes.route(
-    "/registro",
-    methods=["POST"]
-)
-def registrar_usuario():
-    return controller.create()
-
-
-@UsuarioRoutes.route(
-    "/login",
-    methods=["POST"]
-)
-def login_usuario():
-    return controller.login()
-
-
-@UsuarioRoutes.route("/<int:id>", methods=["PUT"])
-def update(id):
-    return controller.update(id)
-
-
-@UsuarioRoutes.route("/<int:id>", methods=["DELETE"])
-def delete(id):
-    return controller.delete(id)
+UsuarioRoutes = crud_blueprint("UsuarioRoutes", controller)
+UsuarioRoutes.add_url_rule("/registro", "registro", controller.create, methods=["POST"])
+UsuarioRoutes.add_url_rule("/login", "login", controller.login, methods=["POST"])
